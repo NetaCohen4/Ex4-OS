@@ -125,6 +125,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    if (E > V * (V - 1) / 2) {
+        std::cerr << "Error: Number of edges exceeds maximum possible for given vertices.\n";
+        return 1;
+    }
+    
+
     Graph g(V);
     std::set<std::pair<int, int>> existing;
     std::mt19937 rng(seed);

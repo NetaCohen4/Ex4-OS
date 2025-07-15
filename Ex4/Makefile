@@ -11,7 +11,7 @@ GCOV_TOOL = gcov
 PROF_FLAGS = -pg
 
 # ברירת מחדל
-all: $(TARGET) prof cov coverage
+all: $(TARGET)
 
 # רגיל
 $(TARGET): $(SRC)
@@ -28,7 +28,14 @@ cov: $(SRC)
 coverage:
 	$(GCOV_TOOL) *.cpp
 
-# ניקוי
-clean:
-	rm -f $(TARGET) *.o *.gcda *.gcno *.gcov gmon.out valgrind.out callgrind.out.*
+# הרצה של כל הבדיקות דרך קובץ הסקריפט
+run: analyze.sh
+	chmod +x analyze.sh
+	./analyze.sh
 
+# ניקוי
+# clean:
+# 	rm -f $(TARGET) *.o *.gcda *.gcno *.h.gcov *.tcc.gcov gmon.out new.gcov 
+
+clean:
+	rm -f $(TARGET) *.o *.gcda *.gcno *.gcov gmon.out valgrind.out callgrind.out coverage_report.txt gprof.txt

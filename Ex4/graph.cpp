@@ -1,3 +1,11 @@
+/*
+1. ללמוד על Valgrind 
+2. להוריד הדפסות מיותרות מהטרמינל, שיהיה כמה שיותר נקי. כגון התוצאה gprof.txt
+3. התוצאה של הcoverage report כרגע היא רק בטרמינל, ליצור קובץ
+
+*/
+
+
 #include <iostream>
 #include <getopt.h>
 #include <random>
@@ -124,6 +132,12 @@ int main(int argc, char* argv[]) {
         usage(argv[0]);
         return 1;
     }
+
+    if (E > V * (V - 1) / 2) {
+        std::cerr << "Error: Number of edges exceeds maximum possible for given vertices.\n";
+        return 1;
+    }
+    
 
     Graph g(V);
     std::set<std::pair<int, int>> existing;
