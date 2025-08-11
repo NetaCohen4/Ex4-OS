@@ -35,25 +35,25 @@ int main() {
             std::cin >> E;
             std::cout << "Enter seed: ";
             std::cin >> seed;
-            while (true) {
-                std::cout << "Choose algorithm:\n";
-                std::cout << "0 - New graph\n";
-                std::cout << "1 - Eulerian Circuit\n";
-                std::cout << "2 - MST Weight\n";
-                std::cout << "3 - Number of Cliques\n";
-                std::cout << "4 - Strongly Connected Components\n";
-                std::cout << "5 - Hamiltonian Circuit\n";
-                std::cout << "Enter algorithm code: ";
-                std::cin >> algoCode;
-                if (algoCode > 5){
-                    std::cout << "Invalid algorithm code. Please try again.\n";
-                    break;
-                }
-                if (algoCode == 0){
-                    break;
-                }
+            // while (true) {
+            //     std::cout << "Choose algorithm:\n";
+            //     std::cout << "0 - New graph\n";
+            //     std::cout << "1 - Eulerian Circuit\n";
+            //     std::cout << "2 - MST Weight\n";
+            //     std::cout << "3 - Number of Cliques\n";
+            //     std::cout << "4 - Strongly Connected Components\n";
+            //     std::cout << "5 - Hamiltonian Circuit\n";
+            //     std::cout << "Enter algorithm code: ";
+            //     std::cin >> algoCode;
+            //     if (algoCode > 5){
+            //         std::cout << "Invalid algorithm code. Please try again.\n";
+            //         break;
+            //     }
+            //     if (algoCode == 0){
+            //         break;
+            //     }
 
-                int data[4] = {V, E, seed, algoCode};
+                int data[3] = {V, E, seed};
                 send(sock, data, sizeof(data), 0);
 
                 int msgSize = 0;
@@ -75,7 +75,7 @@ int main() {
                 }
 
                 std::cout << "Server Response: " << buffer.data() << "\n\n";
-            }
+            
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << "\n";
         }

@@ -320,64 +320,45 @@ void handleClient(int client_socket, sockaddr_in client_addr)
     inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
     std::cout << "Client connected from " << client_ip << ":" << ntohs(client_addr.sin_port) << "\n";
 
-    while (true)
-    {
-        int data[4]; // V, E, seed, algoCode
-        ssize_t bytesRead = read(client_socket, data, sizeof(data));
-        if (bytesRead != sizeof(data))
-        {
-            std::cout << "Connection closed or invalid request.\n";
-            break;
-        }
-        int V = data[0], E = data[1], seed = data[2], algoCode = data[3];
-
-        Graph g(V);
-        std::set<std::pair<int, int>> existing;
-        std::mt19937 rng(seed);
-        std::uniform_int_distribution<int> dist(0, V - 1);
-
-        while ((int)existing.size() < E)
-        {
-            int u = dist(rng);
-            int v = dist(rng);
-            if (u == v)
-                continue;
-            auto edge = std::minmax(u, v);
-            if (!existing.count(edge))
-            {
-                g.addEdge(edge.first, edge.second);
-                existing.insert(edge);
-            }
-        }
-
-        std::string result;
-        switch (algoCode)
-        {
-        // case 0: result = "New graph created"; break;
-        case 1:
-            result = g.eulerianCircuit();
-            break;
-        case 2:
-            result = g.MST();
-            break;
-        case 3:
-            result = g.numCliques();
-            break;
-        case 4:
-            result = g.SCC();
-            break;
-        case 5:
-            result = g.hamiltonianCircuit();
-            break;
-        default:
-            result = "Invalid algorithm code";
-            break;
-        }
-
-        int len = result.size();
-        write(client_socket, &len, sizeof(len));
-        write(client_socket, result.c_str(), len);
+    int data[3]; // V, E, seed בלבד
+    ssize_t bytesRead = read(client_socket, data, sizeof(data));
+    if (bytesRead != sizeof(data)) {
+        std::cout << "Connection closed or invalid request.\n";
+        close(client_socket);
+        return;
     }
+
+    int V = data[0], E = data[1], seed = data[2];
+
+    // יצירת גרף רנדומלי
+    Graph g(V);
+    std::set<std::pair<int,int>> existing;
+    std::mt19937 rng(seed);
+    std::uniform_int_distribution<int> dist(0, V - 1);
+
+    while ((int)existing.size() < E) {
+        int u = dist(rng);
+        int v = dist(rng);
+        if (u == v) continue;
+        auto edge = std::minmax(u, v);
+        if (!existing.count(edge)) {
+            g.addEdge(edge.first, edge.second);
+            existing.insert(edge);
+        }
+    }
+
+    // שליחה של כל תוצאות האלגוריתמים
+    std::ostringstream oss;
+    oss << g.eulerianCircuit() << "\n";
+    oss << g.MST() << "\n";
+    oss << g.numCliques() << "\n";
+    oss << g.SCC() << "\n";
+    oss << g.hamiltonianCircuit() << "\n";
+
+    std::string result = oss.str();
+    int len = result.size();
+    write(client_socket, &len, sizeof(len));
+    write(client_socket, result.c_str(), len);
 
     close(client_socket);
     std::cout << "Client disconnected.\n";
@@ -386,33 +367,33 @@ void handleClient(int client_socket, sockaddr_in client_addr)
 // ======== Worker thread function (Leader-Follower) ========
 void workerThread()
 {
-    while (!stopServer)
-    {
+    while (!stopServer) {
         sockaddr_in client_addr{};
         socklen_t client_len = sizeof(client_addr);
         int client_socket = -1;
 
-        // Leader election
+        // שלב ה-Leader Election
         {
             std::unique_lock<std::mutex> lock(mtx);
-            cv.wait(lock, []
-                    { return !hasLeader || stopServer; });
-            if (stopServer)
-                return;
-            hasLeader = true;
+            cv.wait(lock, [] { return !hasLeader || stopServer; });
+            if (stopServer) return;
+
+            hasLeader = true; // אני הלידר
             lock.unlock();
 
+            // קבלת חיבור מהלקוח
             client_socket = accept(server_fd, (sockaddr *)&client_addr, &client_len);
 
+            // העברת ההנהגה לפולואר הבא מיד אחרי accept
             lock.lock();
             hasLeader = false;
             cv.notify_one();
+            lock.unlock();
         }
 
+        // טיפול בלקוח
         if (client_socket >= 0)
-        {
             handleClient(client_socket, client_addr);
-        }
     }
 }
 
