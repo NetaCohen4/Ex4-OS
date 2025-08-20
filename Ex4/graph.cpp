@@ -1,11 +1,3 @@
-/*
-1. ללמוד על Valgrind 
-2. להוריד הדפסות מיותרות מהטרמינל, שיהיה כמה שיותר נקי. כגון התוצאה gprof.txt
-3. התוצאה של הcoverage report כרגע היא רק בטרמינל, ליצור קובץ
-
-*/
-
-
 #include <iostream>
 #include <getopt.h>
 #include <random>

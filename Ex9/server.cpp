@@ -16,7 +16,6 @@
 
 bool stopServer = false;
 int server_fd;
-// ======== Graph Class (כמו שלך, קיצרתי כאן לצורך דוגמה) ========
 
 class Graph
 {
@@ -217,18 +216,15 @@ public:
         std::stack<int> Stack;
         std::vector<bool> visited(V, false);
 
-        // שלב 1: מילוי הסטאק לפי סדר סיום DFS
         for (int i = 0; i < V; ++i)
             if (!visited[i])
                 fillOrder(i, visited, Stack);
 
-        // שלב 2: הפיכת הגרף
         Graph gr = getTranspose();
         visited.assign(V, false);
 
         std::vector<std::vector<int>> sccGroups;
 
-        // שלב 3: הרצת DFS בגרף ההפוך לפי הסדר בסטאק
         while (!Stack.empty())
         {
             int v = Stack.top();
@@ -270,7 +266,6 @@ public:
     {
         if (pos == V)
         {
-            // בודק חזרה לנקודת ההתחלה
             return std::find(adj[path[pos - 1]].begin(), adj[path[pos - 1]].end(), path[0]) != adj[path[pos - 1]].end();
         }
 
@@ -300,7 +295,7 @@ public:
             std::string result = "Hamiltonian Circuit: ";
             for (int v : path)
                 result += std::to_string(v) + " -> ";
-            result += std::to_string(path[0]); // חזרה להתחלה
+            result += std::to_string(path[0]); 
             return result;
         }
         else
@@ -334,7 +329,7 @@ public:
         cv.wait(lock, [&]
                 { return !q.empty() || stopServer; });
         if (q.empty())
-            return T(); // במקרה של סגירה
+            return T(); 
         T item = std::move(q.front());
         q.pop();
         return item;
@@ -386,7 +381,7 @@ void readerThread()
 
         try
         {
-            int data[3]; // V, E, seed בלבד
+            int data[3]; // V, E, seed 
             ssize_t bytesRead = read(client.socket, data, sizeof(data));
             if (bytesRead != sizeof(data))
             {
@@ -395,7 +390,6 @@ void readerThread()
                 continue;
             }
 
-            // עיבוד גרף
             int V = data[0], E = data[1], seed = data[2];
             Graph g(V);
             std::set<std::pair<int, int>> existing;

@@ -224,14 +224,10 @@ quick-test: $(TARGET)
 	@echo "Quick test completed ✓"
 
 # Clean all generated files
-clean:
+clean-all:
 	@echo "Cleaning up generated files..."
 	@rm -f $(TARGET) $(TARGET)_* 
-	@rm -f *.gcov *.gcda *.gcno coverage.info gmon.out callgrind.out
-	@rm -f coverage_report.txt coverage_summary.txt
-	@rm -f gprof_report.txt gprof_summary.txt
-	@rm -f valgrind_memcheck.txt memcheck_summary.txt
-	@rm -f callgrind_report.txt callgrind_summary.txt
+	@rm -f *.gcov *.gcda *.gcno coverage.info gmon.out callgrind.out *.txt
 	@rm -rf coverage_html
 	@echo "✓ Cleanup completed"
 

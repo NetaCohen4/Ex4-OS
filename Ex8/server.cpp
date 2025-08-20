@@ -12,7 +12,6 @@
 #include <functional>
 #include <sstream>
 
-// ======== Graph Class (כמו שלך, קיצרתי כאן לצורך דוגמה) ========
 
 class Graph
 {
@@ -213,18 +212,18 @@ public:
         std::stack<int> Stack;
         std::vector<bool> visited(V, false);
 
-        // שלב 1: מילוי הסטאק לפי סדר סיום DFS
+        //  1: DFS
         for (int i = 0; i < V; ++i)
             if (!visited[i])
                 fillOrder(i, visited, Stack);
 
-        // שלב 2: הפיכת הגרף
+        //  2: Transpose
         Graph gr = getTranspose();
         visited.assign(V, false);
 
         std::vector<std::vector<int>> sccGroups;
 
-        // שלב 3: הרצת DFS בגרף ההפוך לפי הסדר בסטאק
+        //  3: DFS on Transpose
         while (!Stack.empty())
         {
             int v = Stack.top();
@@ -266,7 +265,6 @@ public:
     {
         if (pos == V)
         {
-            // בודק חזרה לנקודת ההתחלה
             return std::find(adj[path[pos - 1]].begin(), adj[path[pos - 1]].end(), path[0]) != adj[path[pos - 1]].end();
         }
 
@@ -296,7 +294,7 @@ public:
             std::string result = "Hamiltonian Circuit: ";
             for (int v : path)
                 result += std::to_string(v) + " -> ";
-            result += std::to_string(path[0]); // חזרה להתחלה
+            result += std::to_string(path[0]); 
             return result;
         }
         else
@@ -320,7 +318,7 @@ void handleClient(int client_socket, sockaddr_in client_addr)
     inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
     std::cout << "Client connected from " << client_ip << ":" << ntohs(client_addr.sin_port) << "\n";
 
-    int data[3]; // V, E, seed בלבד
+    int data[3]; 
     ssize_t bytesRead = read(client_socket, data, sizeof(data));
     if (bytesRead != sizeof(data)) {
         std::cout << "Connection closed or invalid request.\n";
@@ -329,8 +327,6 @@ void handleClient(int client_socket, sockaddr_in client_addr)
     }
 
     int V = data[0], E = data[1], seed = data[2];
-
-    // יצירת גרף רנדומלי
     Graph g(V);
     std::set<std::pair<int,int>> existing;
     std::mt19937 rng(seed);
@@ -347,7 +343,6 @@ void handleClient(int client_socket, sockaddr_in client_addr)
         }
     }
 
-    // שליחה של כל תוצאות האלגוריתמים
     std::ostringstream oss;
     oss << g.eulerianCircuit() << "\n";
     oss << g.MST() << "\n";
@@ -372,26 +367,22 @@ void workerThread()
         socklen_t client_len = sizeof(client_addr);
         int client_socket = -1;
 
-        // שלב ה-Leader Election
         {
             std::unique_lock<std::mutex> lock(mtx);
             cv.wait(lock, [] { return !hasLeader || stopServer; });
             if (stopServer) return;
 
-            hasLeader = true; // אני הלידר
+            hasLeader = true; 
             lock.unlock();
 
-            // קבלת חיבור מהלקוח
             client_socket = accept(server_fd, (sockaddr *)&client_addr, &client_len);
 
-            // העברת ההנהגה לפולואר הבא מיד אחרי accept
             lock.lock();
             hasLeader = false;
             cv.notify_one();
             lock.unlock();
         }
 
-        // טיפול בלקוח
         if (client_socket >= 0)
             handleClient(client_socket, client_addr);
     }
@@ -401,7 +392,6 @@ void workerThread()
 int main()
 {
     struct sockaddr_in address{};
-    // int addrlen = sizeof(address);
 
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == 0)
@@ -431,7 +421,6 @@ int main()
 
     std::cout << "Server listening on port 8080...\n";
 
-    // יצירת pool של threads
     const int THREAD_COUNT = 4;
     std::vector<std::thread> threads;
     for (int i = 0; i < THREAD_COUNT; i++)
@@ -439,7 +428,6 @@ int main()
         threads.emplace_back(workerThread);
     }
 
-    // לחכות לעצירה (במבחן אמיתי, אפשר לשים Ctrl+C handler)
     for (auto &t : threads)
         t.join();
 
