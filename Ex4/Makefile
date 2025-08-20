@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra -fprofile-arcs -ftest-coverage -g
+CXXFLAGS = -std=c++11 -Wall -Wextra -fprofile-arcs -g
 TARGET = graph
 SOURCES = graph.cpp
 
@@ -20,7 +20,7 @@ debug: $(SOURCES)
 	$(CXX) $(CXXFLAGS) -g -O0 -o $(TARGET)_debug $(SOURCES)
 
 # Code Coverage Test
-test-coverage: coverage
+coverage-run: coverage
 	@echo "=== Running Code Coverage Tests ==="
 	@echo "Testing various scenarios..."
 	# Small connected graph with Eulerian circuit
@@ -166,7 +166,7 @@ install-tools:
 # Run all tests in sequence
 test-all: coverage profile debug
 	@echo "=== Running Complete Test Suite ==="
-	make test-coverage
+	make coverage-run
 	make generate-coverage
 	make test-profile
 	make generate-profile
@@ -188,7 +188,7 @@ show-results:
 	@if [ -f coverage_report.txt ]; then \
 		cat coverage_report.txt; \
 	else \
-		echo "  ❌ Not available - run 'make test-coverage generate-coverage'"; \
+		echo "  ❌ Not available - run 'make coverage-run generate-coverage'"; \
 	fi
 	@echo ""
 	@echo "⚡ PERFORMANCE PROFILE:"
@@ -246,7 +246,7 @@ help:
 	@echo ""
 	@echo "🧪 Test Targets:"
 	@echo "  make quick-test         - Quick functionality test"
-	@echo "  make test-coverage      - Run code coverage analysis"
+	@echo "  make coverage-run      - Run code coverage analysis"
 	@echo "  make test-profile       - Run performance profiling"
 	@echo "  make memcheck      - Run memory leak detection"
 	@echo "  make callgrind     - Run call graph analysis"
@@ -264,4 +264,4 @@ help:
 	@echo "  make clean              - Remove all generated files"
 	@echo "  make help               - Show this help"
 
-.PHONY: clean coverage profile debug test-coverage test-profile memcheck callgrind test-all generate-coverage generate-profile generate-memcheck-report generate-callgrind-report show-results install-tools quick-test help
+.PHONY: clean coverage profile debug coverage-run test-profile memcheck callgrind test-all generate-coverage generate-profile generate-memcheck-report generate-callgrind-report show-results install-tools quick-test help

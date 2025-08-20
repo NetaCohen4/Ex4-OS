@@ -93,8 +93,7 @@ all_valgrind: helgrind memcheck callgrind
 	@echo "=== All Valgrind tests completed (Memcheck + Callgrind + Helgrind on Client + Server) ==="
 
 # Build with coverage
-coverage: $(SOURCES)
-	$(CXX) $(CXXFLAGS) --coverage -g -o $(TARGET) $(SOURCES)
+coverage: $(TARGETS)
 
 # Coverage run with server + client
 coverage-run: coverage server client
@@ -108,7 +107,7 @@ coverage-run: coverage server client
 	sh -c "printf '3\n3\n1\n' | ./client"
 	sh -c "printf '5\n5\n1\n' | ./client"
 	sh -c "printf '2\n2\n1\n' | ./client"
-	@echo "=== Coverage run finished, now you can run 'make generate-coverage' ==="
+	@echo "=== Coverage run finished ==="
 
 clean:
 	rm -f $(TARGETS) server.log

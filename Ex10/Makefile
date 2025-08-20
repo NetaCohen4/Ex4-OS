@@ -1,8 +1,5 @@
 SHELL := /bin/bash
-
-# Adjust the list of exercise directories if yours are named differently
-EXS := ../Ex4 ../Ex6 #../Ex7 ../Ex8 ../Ex9
-
+EXS := ../Ex4 ../Ex6 ../Ex7 ../Ex8 ../Ex9
 REPORT_DIR := valgrind_reports
 
 prepare:
