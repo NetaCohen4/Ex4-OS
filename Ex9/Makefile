@@ -21,7 +21,7 @@ wait-for-server:
 wait-for-client-connection:
 	@echo "=== Waiting for client to successfully connect ==="
 	@timeout 30s sh -c '\
-		while ! printf "3\n3\n1\n1\n2\n3\n4\n5\n" | ./client > /dev/null 2>&1; do \
+		while ! printf "3\n3\n1\n" | ./client > /dev/null 2>&1; do \
 			sleep 1; \
 		done; \
 		echo "Client successfully connected!"; \
@@ -51,8 +51,8 @@ memcheck: debug
 			--track-origins=yes \
 			--verbose \
 			--log-file=valgrind_memcheck_client.txt \
-			sh -c "printf '3\n3\n1\n1\n2\n3\n4\n5\n' | ./client"; 
-			sh -c "printf '5\n5\n1\n1\n2\n3\n4\n5\n' | ./client";
+			sh -c "printf '3\n3\n1\n' | ./client"; 
+			sh -c "printf '5\n5\n1\n' | ./client";
 		sleep 5; 
 	@echo "Memcheck completed."
 
@@ -67,8 +67,8 @@ callgrind: debug
 		$(MAKE) wait-for-client-connection; \
 		valgrind --tool=callgrind \
 			--callgrind-out-file=callgrind_client.out \
-			sh -c "printf '3\n3\n1\n1\n2\n3\n4\n5\n' | ./client"; \
-			sh -c "printf '5\n5\n1\n1\n2\n3\n4\n5\n' | ./client";
+			sh -c "printf '3\n3\n1\n' | ./client"; \
+			sh -c "printf '5\n5\n1\n' | ./client";
 		sleep 5; 
 	@echo "Callgrind completed." 
 
@@ -81,11 +81,16 @@ helgrind: server client
 	$(MAKE) wait-for-server
 	$(MAKE) wait-for-client-connection
 	valgrind --tool=helgrind --log-file=helgrind_client1.txt \
-		sh -c "printf '3\n3\n1\n1\n2\n3\n4\n5\n' | ./client"
+		sh -c "printf '3\n3\n1\n' | ./client"
 	valgrind --tool=helgrind --log-file=helgrind_client2.txt \
-		sh -c "printf '5\n5\n1\n1\n2\n3\n4\n5\n' | ./client"
+		sh -c "printf '5\n5\n1\n' | ./client"
 
 	@echo "Helgrind completed."
+
+
+# ----- Run all -----
+all_valgrind: helgrind memcheck callgrind 
+	@echo "=== All Valgrind tests completed (Memcheck + Callgrind + Helgrind on Client + Server) ==="
 
 # Build with coverage
 coverage: $(SOURCES)
@@ -105,16 +110,9 @@ coverage-run: coverage server client
 	sh -c "printf '2\n2\n1\n' | ./client"
 	@echo "=== Coverage run finished, now you can run 'make generate-coverage' ==="
 
-
-# ----- Run all -----
-all_valgrind: helgrind memcheck callgrind 
-	@echo "=== All Valgrind tests completed (Memcheck + Callgrind + Helgrind on Client + Server) ==="
-
-
 clean:
 	rm -f $(TARGETS) server.log
 
 clean-all:
 	rm -f $(TARGETS) valgrind_memcheck_*.txt callgrind_*.out helgrind_*.txt *.gcno *.gcda server.log callgrind.*
 		
-

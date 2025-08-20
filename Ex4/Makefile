@@ -82,7 +82,7 @@ generate-profile:
 	@echo "Full report available at: gprof_report.txt"
 
 # Memory Check with Valgrind
-test-memcheck: debug
+memcheck: debug
 	@echo "=== Running Valgrind Memory Check ==="
 	@echo "This may take a while... Testing memory safety"
 	valgrind --leak-check=full \
@@ -115,7 +115,7 @@ generate-memcheck-report:
 	@echo "Memory check summary saved to: memcheck_summary.txt"
 
 # Call Graph Analysis with Callgrind
-test-callgrind: debug
+callgrind: debug
 	@echo "=== Running Valgrind Callgrind ==="
 	@echo "This will be slow but thorough..."
 	valgrind --tool=callgrind \
@@ -123,6 +123,17 @@ test-callgrind: debug
 		./$(TARGET)_debug -v 20 -e 30 -s 12345
 		./$(TARGET)_debug -v 3 -e 3 -s 1
 	@echo "Call graph analysis completed."
+
+helgrind: debug
+	@echo "=== Running Valgrind Helgrind ==="
+	valgrind --tool=helgrind \
+	     --log-file=helgrind_graph.txt \
+	    ./$(TARGET)_debug -v 20 -e 30 -s 12345
+		./$(TARGET)_debug -v 3 -e 3 -s 1
+	@echo "Helgrind analysis completed."
+
+all_valgrind: helgrind memcheck callgrind 
+	@echo "=== All Valgrind tests completed (Memcheck + Callgrind + Helgrind on Client + Server) ==="
 
 generate-callgrind-report:
 	@echo "=== Generating Call Graph Report ==="
@@ -159,9 +170,9 @@ test-all: coverage profile debug
 	make generate-coverage
 	make test-profile
 	make generate-profile
-	make test-memcheck
+	make memcheck
 	make generate-memcheck-report
-	make test-callgrind
+	make callgrind
 	make generate-callgrind-report
 	@echo "=== All tests completed ==="
 	make show-results
@@ -191,14 +202,14 @@ show-results:
 	@if [ -f memcheck_summary.txt ]; then \
 		cat memcheck_summary.txt; \
 	else \
-		echo "  ❌ Not available - run 'make test-memcheck generate-memcheck-report'"; \
+		echo "  ❌ Not available - run 'make memcheck generate-memcheck-report'"; \
 	fi
 	@echo ""
 	@echo "📈 CALL GRAPH:"
 	@if [ -f callgrind_summary.txt ]; then \
 		cat callgrind_summary.txt; \
 	else \
-		echo "  ❌ Not available - run 'make test-callgrind generate-callgrind-report'"; \
+		echo "  ❌ Not available - run 'make callgrind generate-callgrind-report'"; \
 	fi
 	@echo ""
 	@echo "=========================================="
@@ -237,8 +248,8 @@ help:
 	@echo "  make quick-test         - Quick functionality test"
 	@echo "  make test-coverage      - Run code coverage analysis"
 	@echo "  make test-profile       - Run performance profiling"
-	@echo "  make test-memcheck      - Run memory leak detection"
-	@echo "  make test-callgrind     - Run call graph analysis"
+	@echo "  make memcheck      - Run memory leak detection"
+	@echo "  make callgrind     - Run call graph analysis"
 	@echo "  make test-all           - Run all tests"
 	@echo ""
 	@echo "📊 Report Generation:"
@@ -253,4 +264,4 @@ help:
 	@echo "  make clean              - Remove all generated files"
 	@echo "  make help               - Show this help"
 
-.PHONY: clean coverage profile debug test-coverage test-profile test-memcheck test-callgrind test-all generate-coverage generate-profile generate-memcheck-report generate-callgrind-report show-results install-tools quick-test help
+.PHONY: clean coverage profile debug test-coverage test-profile memcheck callgrind test-all generate-coverage generate-profile generate-memcheck-report generate-callgrind-report show-results install-tools quick-test help
